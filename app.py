@@ -2,6 +2,7 @@ from flask import Flask, jsonify
 from students import students_bp
 from course import courses_bp
 from teachers import teachers_bp  
+from auth import auth_bp
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = "CSelect1"
@@ -10,6 +11,7 @@ app.config['SECRET_KEY'] = "CSelect1"
 app.register_blueprint(students_bp, url_prefix='/api')
 app.register_blueprint(courses_bp, url_prefix='/api')
 app.register_blueprint(teachers_bp, url_prefix='/api') 
+app.register_blueprint(auth_bp, url_prefix='/api') 
 
 # routes 
 @app.route("/routes")
