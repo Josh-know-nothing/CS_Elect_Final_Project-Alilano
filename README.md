@@ -1,16 +1,16 @@
-# Welcome to the Student Management REST API
+# Student Management API
 
-An API Created to manage students,courses and teachers, It supports JWT authentication, JSON/XML responses, search, and MySQL 
+A Flask-based REST API for managing students, courses, and authentication. It supports JWT authentication, MySQL persistence, and standard CRUD operations.
+
 ## Features
-- JWT auth for protected endpoints
-- JSON or XML responses via `?format=xml`
-- CRUD for shoes, brands, users (read-only), reviews
-- Search across shoes and brands
-- MySQL database using `mysql-connector-python==9.5.0`
+- JWT authentication for protected endpoints
+- CRUD operations for students and courses
+- MySQL database persistence
+- Search and filtering capabilities
 
 ## Requirements
-- Python 3.1
-- MySQL Server (with a database named `mydb` by default)
+- Python 3.14
+- MySQL Server
 - Packages in [requirements.txt](requirements.txt)
 
 ## Installation
@@ -28,8 +28,6 @@ The app reads configuration from environment variables (with sane defaults):
 - `MYSQL_DB` (default: `mydb`)
 - `SECRET_KEY` (default: `CSelect1`)
 
-
-
 ## Running
 
 Python
@@ -38,62 +36,81 @@ python app.py
 ```
 
 ## API Usage
+Base URL: http://localhost:5000
 
-Base URL: `http://localhost:5000`
-
-Auth:
-- `POST /auth/login` — body `{ "email": "user@example.com", "password": "..." }`
-- Response: `{ token, expires_at }`
-- Use token as header: `Authorization: Bearer <token>`
-
-Shoes:
-- `GET /shoes` — optional filters `brand`, `color`, `size`, `min_price`, `max_price`
-- `GET /shoes/<id>`
-- `POST /shoes` (auth) — `{ name, brand_id, size, color, price }`
-- `PUT /shoes/<id>` (auth) — partial updates allowed
-- `DELETE /shoes/<id>` (auth)
-
-Brands:
-- `GET /brands`
-- `GET /brands/<id>`
-- `POST /brands` (auth) — `{ name }`
-- `PUT /brands/<id>` (auth)
-- `DELETE /brands/<id>` (auth)
-
-Users:
-- `GET /users` (auth)
-- `GET /users/<id>` (auth)
-
-Reviews:
-- `GET /reviews`
-- `GET /reviews/<id>`
-- `POST /reviews` (auth) — `{ user_id, shoe_id, rating, comment }`
-- `PUT /reviews/<id>` (auth)
-- `DELETE /reviews/<id>` (auth)
-
-Search:
-- `GET /search?q=<term>` — returns `{ shoes, brands }`
-
-Response format:
-- Add `?format=xml` to any endpoint for XML output, default is JSON.
-
-## Postman Quick Start
-1. Start the server.
-2. `POST /auth/login` with a valid user to get a token.
-3. For protected endpoints, set Postman Authorization to “Bearer Token” and paste the token.
-4. Try `GET /shoes` or `GET /shoes?format=xml`.
-
-## Testing
-Run unit tests:
-```cmd
-python -m unittest app.test
+### Authentication
+**POST /auth/login** — body:
+```json
+{
+  "username": "admin",
+  "password": "admin123"
+}
 ```
-Tests use Flask’s test client and mock DB access (`fetch_one`, `execute`) and JWT decode where needed.
+Response:
+```json
+{
+  "token": "<jwt_token>",
+  "expires_at": "2025-12-15T12:00:00"
+}
+```
+Use the token in headers for protected routes:
+```
+Authorization: Bearer <jwt_token>
+```
+
+### Students
+- **GET /students** — list all students
+- **GET /students/<id>** — get a specific student
+- **POST /students** (auth) — add a student:
+```json
+{
+  "first_name": "John",
+  "last_name": "Doe",
+  "age": 20,
+  "gender": "male",
+  "course_id": 1
+}
+```
+- **PUT /students/<id>** (auth) — update a student (partial updates allowed)
+- **DELETE /students/<id>** (auth) — remove a student
+
+### Courses
+- **GET /courses** — list all courses
+- **GET /courses/<id>** — get a specific course
+- **POST /courses** (auth) — add a course:
+```json
+{
+  "name": "Computer Science"
+}
+```
+- **PUT /courses/<id>** (auth) — update a course
+- **DELETE /courses/<id>** (auth) — remove a course
+
+## Examples
+Get all students:
+```bash
+curl http://localhost:5000/students
+```
+Add a student (with auth token):
+```bash
+curl -X POST http://localhost:5000/students \
+-H "Authorization: Bearer <jwt_token>" \
+-H "Content-Type: application/json" \
+-d '{"first_name":"John","last_name":"Doe","age":20,"gender":"male","course_id":1}'
+```
+
+## Notes
+- Ensure foreign key constraints are respected: student course_id must exist in courses.
+- All SQL queries are parameterized to prevent SQL injection.
+- JWT tokens expire according to JWT_EXPIRATION_DELTA.
 
 ## Project Structure
-- `app/__init__.py` — app factory and MySQL init
-- `app/routes.py` — all API endpoints and helpers
-- `runningshoeAPI.py` — simple entrypoint to run the app
+- `app.py` — main entrypoint for Flask
+- `students.py` — student routes and logic
+- `courses.py` — course routes and logic
+- `teachers.py` — teachers routes and logic
+- `auth.py` — authentication routes and JWT logic
+- `db.py` — database connection utility
 - `requirements.txt` — dependencies
 - `README.md` — this documentation
 
