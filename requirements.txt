@@ -8,6 +8,7 @@ jsonify==0.5
 make_response==1
 MarkupSafe==3.0.3
 mysql-connector-python==9.5.0
+PyJWT==2.10.1
 setuptools==80.9.0
 Werkzeug==3.1.4
 wheel==0.45.1
